@@ -3,7 +3,7 @@ class Particle
   PVector pos;
   float size = 20;
   ArrayList<Ray> rays;
-  int RAY_COUNT = 10;
+  int RAY_COUNT = 30;
 
   NN nn;
   float[] inputs;
@@ -122,4 +122,8 @@ class Particle
   void CheckWallCollision(ArrayList<Boundary> w)
   {
   }
+  
+  
+  
+  
 }

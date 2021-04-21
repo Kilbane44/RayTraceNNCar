@@ -14,13 +14,13 @@ class Car extends Particle
 
   float topSpeed = 14;
 
-  int fitness = 0;
+  int fitness = 1;
   int score =0;
 
 
   float dTraveled=0;
   int checkTime =0;
-  int timeOutDelay =1000;
+  int timeOutDelay =4000;
   PVector prevPos;
 
 
@@ -34,7 +34,7 @@ class Car extends Particle
       inputs[i] = -1;
     }
 
-
+    size = 20;
     ///Two output network or 4?
     nn = new NN(inputs, 1, 2);
 
@@ -57,8 +57,13 @@ class Car extends Particle
 
     cookies.add(new Token());
 
+    for (Token cook : AllCookies)
+    {
+      cookies.add(new Token(cook));
+    }
 
     nn.randomize();
+    alive = true;
   }
 
 
@@ -83,7 +88,11 @@ class Car extends Particle
 
     CheckTokens();
     HaveIMoved();
-    DrawNet();
+
+    if (SHOW_NET)
+    {
+      DrawNet();
+    }
   }
 
   void HaveIMoved()
@@ -91,19 +100,17 @@ class Car extends Particle
     if (millis() - checkTime > timeOutDelay)
     {
       checkTime = millis();
-
-
       if (dist(prevPos.x, prevPos.y, pos.x, pos.y) < size)
       {
-        Reset();
+        //Reset();
+        alive = false;
       }
       prevPos = pos.copy();
     }
 
-
     if (alive == false)
     {
-      Reset();
+      //Reset();
     }
   }
 
@@ -280,10 +287,13 @@ class Car extends Particle
 
       if (closestPt.x != 0 && closestPt.y !=0)
       {
-        stroke(255);
-        fill(255);
-        line(pos.x, pos.y, closestPt.x, closestPt.y);
-        ellipse(closestPt.x, closestPt.y, 8, 8);
+        if (SHOW_RAYS)
+        {
+          stroke(255);
+          fill(255);
+          line(pos.x, pos.y, closestPt.x, closestPt.y);
+          ellipse(closestPt.x, closestPt.y, 8, 8);
+        }
       }
 
       i++;
@@ -309,13 +319,12 @@ class Car extends Particle
     {
       token.touched = false;
     }
+    fitness = 1;
 
     for (float i=0; i < 360; i+=360/RAY_COUNT)
     {
       rays.add(new Ray(pos, radians(i)));
     }
-
-    //nn.randomize();
   }
 
 
@@ -326,6 +335,8 @@ class Car extends Particle
     inputs[RAY_COUNT+3] =dir.y;
     inputs[RAY_COUNT+4] =pos.x;
     inputs[RAY_COUNT+5] =pos.y;
+
+
     nn.compute();
   }
 
@@ -337,13 +348,44 @@ class Car extends Particle
   {
     for (Token token : cookies)
     {
-      token.Draw();
-
       if (dist(pos.x, pos.y, token.pos.x, token.pos.y) < (size/2 + token.size/2))
       {
-        token.touched = true;
-        fitness++;
+        if (token.touched == false)
+        {
+          token.touched = true;
+          fitness++;
+        }
+      }
+
+      if (SHOW_TOKENS)
+      {
+        //token.Draw();
       }
     }
+  }
+
+
+  String toString()
+  {
+    String finalOutput ="";
+
+    finalOutput += fitness;
+    finalOutput += "\n";
+
+    for (int i=0; i < nn.weights.length; i++)
+    {
+      finalOutput += nn.weights[i];
+      finalOutput += " ";
+    }
+    finalOutput += "\n";
+
+    for (int i=0; i < nn.biases.length; i++)
+    {
+      finalOutput += nn.biases[i];
+      finalOutput += " ";
+    }
+    //Fit / Weights / Biases
+
+    return finalOutput;
   }
 }

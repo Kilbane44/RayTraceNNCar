@@ -58,6 +58,7 @@ class NN {
         outputs[i] += hidden_outputs[x]*weights[(num_of_inputs*num_of_hidden)+x];
       }
       outputs[i] += biases[num_of_hidden+i];
+      
       outputs[i] = (float)Math.tanh(outputs[i]);
     }
   }

@@ -1,4 +1,4 @@
-
+ //<>//
 Boundary wall;
 Ray ray;
 Particle player;
@@ -6,10 +6,15 @@ Particle player;
 
 boolean W, A, S, D, Shift = false;
 
-int number_of_players =4;
-Car c;
+
+////////////////////////////////Player Count//////////////////////////////
+int number_of_players =250;
 
 
+
+boolean SHOW_TOKENS = false;
+boolean SHOW_RAYS = false;
+boolean SHOW_NET = false;
 
 
 PrintWriter output;
@@ -26,21 +31,28 @@ int[] fitness_scores;
 int[] fit_array;
 int movingIndex = 0;
 
+int fit_record = 0;
+
 Car parentone;
 Car child;
 
-float mutRate = 3;
 
+
+
+float mutRate = 35;
 int genCounter=1;
 Population population;
 
 
 
+
+ArrayList<Token> AllCookies = new ArrayList<Token>();
+
 String level = "raceTrack.txt";
 //Token tok = new Token();
 void setup()
 {
-  size(800, 800);
+  size(800, 800, P2D);
   // wall = new Boundary(300,100,300,300);
 
   //walls.add(wall);
@@ -54,7 +66,7 @@ void setup()
 
   LoadLevel(level);
 
-  c = new Car();
+  // c = new Car();
 
   childPlayers = new Car[number_of_players];
   for (int i = 0; i < number_of_players; i++) {
@@ -67,7 +79,9 @@ void setup()
     savedBrains[i].nn.randomize();
   }
 
-
+  AllCookies.add(new Token());
+  parentone = new Car();
+  child = new Car();
   population = new Population(number_of_players);
 }
 
@@ -77,60 +91,76 @@ void draw()
 {
   background(0);
   DrawWalls();
+  DrawCookies();
 
   //Mouse Attached Particle
   player.SetPos(mouseX, mouseY);
   player.Draw();
   player.LookAt(walls);
 
-  //Car object
-  c.Update(walls);
-
-
-
   population.update(walls);
 
-
+  textSize(20);
+  text("Fitness Record: "+fit_record, 500, 50);
+  text("Current Pop: "+ population.living_players, 500, 100);
+  textSize(10);
   //Inputs(); WASD Player Movement
 }
 
 
+void DrawCookies()
+{
 
+  if (SHOW_TOKENS)
+  {
+    int i=0;
+    for (Token cook : AllCookies)
+    {
+      fill(0);
+      
+      cook.Draw();
+      text(i,cook.pos.x, cook.pos.y);
+      i++;
+    }
+  }
+}
 void Inputs()
 {
+  /*
   //W
-  if (W)
-  {
-    c.speed += .3;
-  }
-  //S
-  else if (S)
-  {
-    c.speed -= .3;
-  }
-
-  //A
-  if (A)
-  {
-    c.angle -= PI/60;
-
-    //if (Shift)
-    //{
-    //  c.angle-=PI/120;
-    //}
-  }
-
-
-
-  //D
-  else if (D)
-  {
-    c.angle += PI/60;
-    //if (Shift)
-    //{
-    //  c.angle+=PI/120;
-    //}
-  }
+   if (W)
+   {
+   c.speed += .3;
+   }
+   //S
+   else if (S)
+   {
+   c.speed -= .3;
+   }
+   
+   //A
+   if (A)
+   {
+   c.angle -= PI/60;
+   
+   //if (Shift)
+   //{
+   //  c.angle-=PI/120;
+   //}
+   }
+   
+   
+   
+   //D
+   else if (D)
+   {
+   c.angle += PI/60;
+   //if (Shift)
+   //{
+   //  c.angle+=PI/120;
+   //}
+   }
+   */
 }
 
 
@@ -164,11 +194,17 @@ void mouseReleased()
     //newPointB = new PVector(mouseX, mouseY);
     //walls.add(new Boundary(newPointA, newPointB));
 
+    //int counter= 0;
     for (Car car : population.players)
     {
       car.cookies.add(new Token(mouseX, mouseY));
+      //savedBrains[counter].cookies.add(new Token(mouseX, mouseY));
     }
-    c.cookies.add(new Token(mouseX, mouseY));
+    AllCookies.add(new Token(mouseX, mouseY));
+
+
+
+    //c.cookies.add(new Token(mouseX, mouseY));
   }
 }
 
@@ -184,6 +220,28 @@ void keyPressed()
     }
     output.flush(); // Writes the remaining data to the file
     output.close(); // Finishes the file
+  }
+  if (key == '9')
+  {
+    output = createWriter("tokens.txt");
+    for (Token tk : AllCookies)
+    {
+      output.println(tk.toString());
+    }
+    output.flush(); // Writes the remaining data to the file
+    output.close(); // Finishes the file
+  }
+
+
+  if (key == '1')
+  {
+    SHOW_TOKENS = !SHOW_TOKENS;
+    println("SHOW TOKENS: "+SHOW_TOKENS);
+  }
+  if (key == '2')
+  {
+    SHOW_RAYS = !SHOW_RAYS;
+    println("SHOW RAYS: "+SHOW_RAYS);
   }
 
   //if (key=='w'||key=='W')
@@ -250,6 +308,15 @@ void LoadLevel(String s)
 
     walls.add(new Boundary(Float.parseFloat(coords[0]), Float.parseFloat(coords[1]), Float.parseFloat(coords[2]), Float.parseFloat(coords[3])));
   }
+
+
+  lines = loadStrings("tokens.txt");
+  for (int i=0; i < lines.length; i++)
+  {
+    String[] coords =lines[i].split(" ");
+
+    AllCookies.add(new Token(Float.parseFloat(coords[0]), Float.parseFloat(coords[1])));
+  }
 }
 
 
@@ -260,6 +327,7 @@ void restart() {
   if (population.allDead == true) {
 
     //added to population
+    println("Generation: "+ genCounter);
     genCounter++;
 
 
@@ -268,8 +336,8 @@ void restart() {
     }
 
     selectParents();
-    
-    
+
+
     for (int i = 0; i < number_of_players; i++) {
       transferPlayer(childPlayers[i], savedBrains[i]);
     }
@@ -283,13 +351,23 @@ void restart() {
 
 void transferPlayer(Car toTransfer, Car toTransferTo) {
   toTransferTo.size = toTransfer.size;
+
+  toTransferTo.cookies.clear();
+  //toTransferTo.cookies = AllCookies;
+
+  for (Token tk : AllCookies)
+  {
+    toTransferTo.cookies.add(new Token(tk));
+  }
+  toTransferTo.fitness = toTransfer.fitness;
+
   toTransferTo.pos = toTransfer.pos.copy();
   toTransferTo.angle = toTransfer.angle;
   toTransferTo.alive = toTransfer.alive;
   toTransferTo.dir = toTransfer.dir.copy();
 
 
-  toTransferTo.fitness = toTransfer.fitness;
+
   for (int i = 0; i < toTransfer.nn.weights.length; i++) {
     toTransferTo.nn.weights[i] = toTransfer.nn.weights[i];
   }
@@ -301,47 +379,80 @@ void transferPlayer(Car toTransfer, Car toTransferTo) {
 
 
 void selectParents() {
-  
+
   //SORT BY HIGHEST
-  
-  
-  
-  Car[] sortedCars = new Car[population.players.length];
-  
-  for(int i=0; i < population.players.length; i++)
+  Car[] sortedCars = new Car[number_of_players];
+
+  for (int i=0; i < number_of_players; i++)
   {
     sortedCars[i] = new Car();
-    //transferPlayer(savedBrains[i], sortedCars[i]);
+    transferPlayer(savedBrains[i], sortedCars[i]);
   }
-  
-  for(int i=0; i < sortedCars.length; i++)
+
+  for (int i=0; i < sortedCars.length; i++)
   {
-    for(int j=0; j < sortedCars.length-1; j++)
+    for (int j=0; j < sortedCars.length-1; j++)
     {
-      if(sortedCars[i].fitness < sortedCars[i+1].fitness)
+      if (sortedCars[j].fitness < sortedCars[j+1].fitness)
       {
         Car temp = new Car();
-        transferPlayer(sortedCars[i],temp);
-        transferPlayer(sortedCars[i+1],sortedCars[i]);
-        transferPlayer(temp,sortedCars[i+1]);
+        transferPlayer(sortedCars[j], temp);
+        transferPlayer(sortedCars[j+1], sortedCars[j]);
+        transferPlayer(temp, sortedCars[j+1]);
       }
     }
   }
-  
-  
-  println("SORTED FITNESS");
-  for(int i=0; i < sortedCars.length; i++)
+
+  //for(int i =0; i < 2; i++)
+  //{
+  //  transferPlayer(savedBrains[i], sortedCars[i]);
+  //}
+
+
+  //println("SORTED FITNESS");
+  for (int i=0; i < sortedCars.length; i++)
   {
-    println(sortedCars[i].fitness);
+    //println(sortedCars[i].fitness);
+
+    if (sortedCars[i].fitness > fit_record)
+    {
+      fit_record = sortedCars[i].fitness;
+      println("NEW RECORD: "+ fit_record);
+
+      if (fit_record >= 13)
+      {
+        output = createWriter("Champion/"+sortedCars[i].RAY_COUNT+"/"+fit_record+"/"+day()+"_"+month()+"_"+hour()+"_"+minute()+"_"+second()+"_"+millis()+".txt");
+        
+          output.println(sortedCars[i].toString());
+        
+        output.flush(); // Writes the remaining data to the file
+        output.close();
+        println("file write for champion");
+      }
+    }
   }
-  
-  
+
+
+  //fit_sum = 0;
+  //int[] fitness_scores = new int[number_of_players];
+  //for (int i = 0; i < number_of_players; i++) {
+  //  fitness_scores[i] = savedBrains[i].fitness;
+  //  fit_sum += fitness_scores[i];
+  //}
+
+
+
+
+
   fit_sum = 0;
   int[] fitness_scores = new int[number_of_players];
   for (int i = 0; i < number_of_players; i++) {
-    fitness_scores[i] = savedBrains[i].fitness;
+    fitness_scores[i] = sortedCars[i].fitness;
     fit_sum += fitness_scores[i];
   }
+
+
+
 
   fit_array = new int[fit_sum];
   movingIndex = 0;
@@ -355,10 +466,16 @@ void selectParents() {
     transferPlayer(savedBrains[i], childPlayers[i]);
   }
 
-  for (int i = 0; i < number_of_players; i++) {
-    transferPlayer(savedBrains[fit_array[int(random(fit_array.length))]], parentone);
+  println("FIT LENGTH" + fit_array.length);
+  
+  for (int i = 0; i < number_of_players; i++) 
+  {
+    //fit_array.length
+    transferPlayer(sortedCars[fit_array[int(random(1))]], parentone);  
     makeChild(i);
   }
+  
+  
 }
 
 

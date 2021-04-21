@@ -1,4 +1,5 @@
-class Population {
+class Population 
+{
 
   Car[] players;
 
@@ -13,11 +14,10 @@ class Population {
     players = new Car[num_of_players];
     for (int i = 0; i < num_of_players; i++) {
       // INJECTING SAVED INTO NEXT GENERATION AND RESETTING ALL RELEVANT VARIABLES IN PLAYER CLASS
+      
+      
       players[i] = new Car();
-      
       transferPlayer(savedBrains[i], players[i]);
-      
-      
       players[i].Reset();
     }
     living_players = players.length;
@@ -33,7 +33,7 @@ class Population {
     }
     if (living_players == 0) {
       allDead = true;
-      //restart();
+      restart();
     } else {
       allDead = false;
     }
