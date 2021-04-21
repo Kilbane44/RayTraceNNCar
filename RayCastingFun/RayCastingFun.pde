@@ -9,7 +9,7 @@ boolean W, A, S, D, Shift = false;
 
 ////////////////////////////////Player Count//////////////////////////////
 int number_of_players =1000;
-float mutRate = 3;
+float mutRate = 10;
 
 
 boolean SHOW_TOKENS = false;
@@ -81,7 +81,7 @@ void setup()
     savedBrains[i].nn.randomize();
   }
 
-  AllCookies.add(new Token());
+ // AllCookies.add(new Token());
   parentone = new Car();
   child = new Car();
   population = new Population(number_of_players);
@@ -119,9 +119,9 @@ void DrawCookies()
     for (Token cook : AllCookies)
     {
       fill(0);
-      
+
       cook.Draw();
-      text(i,cook.pos.x, cook.pos.y);
+      text(i, cook.pos.x, cook.pos.y);
       i++;
     }
   }
@@ -313,11 +313,15 @@ void LoadLevel(String s)
 
 
   lines = loadStrings("tokens.txt");
-  for (int i=0; i < lines.length; i++)
-  {
-    String[] coords =lines[i].split(" ");
 
-    AllCookies.add(new Token(Float.parseFloat(coords[0]), Float.parseFloat(coords[1])));
+  if (lines != null)
+  {
+    for (int i=0; i < lines.length; i++)
+    {
+      String[] coords =lines[i].split(" ");
+
+      AllCookies.add(new Token(Float.parseFloat(coords[0]), Float.parseFloat(coords[1])));
+    }
   }
 }
 
@@ -383,6 +387,7 @@ void transferPlayer(Car toTransfer, Car toTransferTo) {
 void selectParents() {
 
   //SORT BY HIGHEST
+  int number_of_best_players = 5;
   Car[] sortedCars = new Car[number_of_players];
 
   for (int i=0; i < number_of_players; i++)
@@ -424,15 +429,19 @@ void selectParents() {
       if (fit_record >= 13)
       {
         output = createWriter("Champion/"+sortedCars[i].RAY_COUNT+"/"+fit_record+"/"+day()+"_"+month()+"_"+hour()+"_"+minute()+"_"+second()+"_"+millis()+".txt");
-        
-          output.println(sortedCars[i].toString());
-        
+
+        output.println(sortedCars[i].toString());
+
         output.flush(); // Writes the remaining data to the file
         output.close();
         println("file write for champion");
       }
     }
   }
+
+
+
+
 
 
   //fit_sum = 0;
@@ -442,47 +451,45 @@ void selectParents() {
   //  fit_sum += fitness_scores[i];
   //}
 
-    int number_of_best_players = 10;
-
-
-
-  fit_sum = 0;
-  int[] fitness_scores = new int[number_of_players];
-  for (int i = 0; i < number_of_players; i++) {
-    fitness_scores[i] = sortedCars[i].fitness;
-    fit_sum += fitness_scores[i];
-  }
 
 
 
 
-  fit_array = new int[fit_sum];
-  movingIndex = 0;
-  for (int i = 0; i < fitness_scores.length; i++) {
-    for (int w = 0; w < fitness_scores[i]; w++) {
-      fit_array[movingIndex++] = i;
-    }
-  }
+  //fit_sum = 0;
+  //int[] fitness_scores = new int[number_of_players];
+  //for (int i = 0; i < number_of_players; i++) {
+  //  fitness_scores[i] = sortedCars[i].fitness;
+  //  fit_sum += fitness_scores[i];
+  //}
+
+
+
+
+  //fit_array = new int[fit_sum];
+  //movingIndex = 0;
+  //for (int i = 0; i < fitness_scores.length; i++) {
+  //  for (int w = 0; w < fitness_scores[i]; w++) {
+  //    fit_array[movingIndex++] = i;
+  //  }
+  //}
 
   for (int i = 0; i < childPlayers.length; i++) {
     transferPlayer(savedBrains[i], childPlayers[i]);
   }
 
-  println("FIT LENGTH" + fit_array.length);
-  
-  for(int i=0; i< number_of_best_players; i++)
+  // println("FIT LENGTH" + fit_array.length);
+
+  for (int i=0; i< number_of_best_players; i++)
   {
     transferPlayer(sortedCars[i], childPlayers[i]);
   }
-  
+
   for (int i = number_of_best_players; i < number_of_players; i++) 
   {
     //fit_array.length
     transferPlayer(sortedCars[int(random(number_of_best_players))], parentone);  
     makeChild(i);
   }
-  
-  
 }
 
 

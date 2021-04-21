@@ -2,7 +2,7 @@ class Token
 {
   PVector pos;
   boolean touched = false;
-  float size =60;
+  float size =20;
   Token()
   {
     pos = new PVector(140, 340);

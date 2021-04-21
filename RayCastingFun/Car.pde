@@ -40,7 +40,7 @@ class Car extends Particle
 
 
 
-    pos = new PVector(150, height/2);
+    pos = new PVector(100, height/2);
     rays = new ArrayList<Ray>();
 
     accel = new PVector(0, 0);
@@ -307,7 +307,7 @@ class Car extends Particle
 
   void Reset()
   {
-    pos = new PVector(150, height/2);
+    pos = new PVector(100, height/2);
     rays.clear();
     accel = new PVector(0, 0);
     vel = new PVector(0, 0);
@@ -384,8 +384,17 @@ class Car extends Particle
       finalOutput += nn.biases[i];
       finalOutput += " ";
     }
-    //Fit / Weights / Biases
 
+    finalOutput += "\n";
+    finalOutput += nn.inputs.length;
+
+    finalOutput += "\n";
+    finalOutput += nn.num_of_hidden;
+    finalOutput += "\n";
+    finalOutput += nn.num_of_outputs;
+
+
+    //Fit / Weights / Biases / number of inputs, outputs
     return finalOutput;
   }
 }
