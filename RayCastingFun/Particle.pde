@@ -3,7 +3,7 @@ class Particle
   PVector pos;
   float size = 20;
   ArrayList<Ray> rays;
-  int RAY_COUNT = 30;
+  int RAY_COUNT = 15;
 
   NN nn;
   float[] inputs;

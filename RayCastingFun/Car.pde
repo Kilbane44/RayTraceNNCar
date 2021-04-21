@@ -36,7 +36,7 @@ class Car extends Particle
 
     size = 20;
     ///Two output network or 4?
-    nn = new NN(inputs, 1, 2);
+    nn = new NN(inputs, inputs.length+4, 2);
 
 
 
@@ -198,7 +198,7 @@ class Car extends Particle
       speed += .3;
     }
     //S
-    else if (nn.outputs[0] < .5)
+    else if (nn.outputs[0] < -.5)
     {
       speed -= .3;
     }
@@ -217,7 +217,7 @@ class Car extends Particle
 
 
     //D
-    else if (nn.outputs[1] < .5)
+    else if (nn.outputs[1] < -.5)
     {
       angle += PI/60;
       //if (Shift)

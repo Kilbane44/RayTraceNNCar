@@ -8,8 +8,8 @@ boolean W, A, S, D, Shift = false;
 
 
 ////////////////////////////////Player Count//////////////////////////////
-int number_of_players =250;
-
+int number_of_players =1000;
+float mutRate = 3;
 
 
 boolean SHOW_TOKENS = false;
@@ -39,7 +39,9 @@ Car child;
 
 
 
-float mutRate = 35;
+
+
+
 int genCounter=1;
 Population population;
 
@@ -440,7 +442,7 @@ void selectParents() {
   //  fit_sum += fitness_scores[i];
   //}
 
-
+    int number_of_best_players = 10;
 
 
 
@@ -468,10 +470,15 @@ void selectParents() {
 
   println("FIT LENGTH" + fit_array.length);
   
-  for (int i = 0; i < number_of_players; i++) 
+  for(int i=0; i< number_of_best_players; i++)
+  {
+    transferPlayer(sortedCars[i], childPlayers[i]);
+  }
+  
+  for (int i = number_of_best_players; i < number_of_players; i++) 
   {
     //fit_array.length
-    transferPlayer(sortedCars[fit_array[int(random(1))]], parentone);  
+    transferPlayer(sortedCars[int(random(number_of_best_players))], parentone);  
     makeChild(i);
   }
   
